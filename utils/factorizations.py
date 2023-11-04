@@ -13,5 +13,8 @@ def plot_singular_value_cdf(matrix):
     plt.grid(True)
     plt.show()
 
+def get_svd_decomposition(matrix, rank):
+    return torch.svd_lowrank(matrix, compute_uv=True, q=rank)
+
 def get_cur_decomposition(matrix):
     pass
