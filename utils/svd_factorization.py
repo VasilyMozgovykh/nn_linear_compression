@@ -1,7 +1,7 @@
 import math
 from matplotlib import pyplot as plt
 import torch
-from svd_factorization import CompressedLinear
+from .common import CompressedLinear
 
 
 def get_linear_svd_layers(model: torch.nn.Module, device: str = "cpu"):
