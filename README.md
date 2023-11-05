@@ -56,11 +56,11 @@ $E$ is $c ∗ (m + n)$. The compression rate of CUR decomposition  is $$CR = \fr
 
 ### LinearTimeCUR (LTCUR) [3] ###
 
-![plot](./images\LTCUR.jpg)
+![plot](images/LTCUR.jpg)
 
 ### LeverageScoreCUR (LSCUR) [4] ###
 
-![plot](./images\LSCUR.jpg)
+![plot](images/LSCUR.jpg)
 
 ### 
 
