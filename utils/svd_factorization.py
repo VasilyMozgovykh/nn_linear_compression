@@ -18,6 +18,7 @@ def get_compressed_classifier_by_rank(compressed_matrices, rank):
     classifier = torch.nn.Sequential()
     for i, (U, S, Vh, bias) in enumerate(compressed_matrices):
         m, n = U.shape[0], Vh.shape[0]
+        Vh = Vh.detach().clone()
         Vh[:S.shape[0]] *= S.view(-1, 1)
         if m < n:
             Vh = Vh[:m]
@@ -36,6 +37,7 @@ def get_compressed_classifier_by_compression_rate(compressed_matrices, compressi
     for i, (U, S, Vh, bias) in enumerate(compressed_matrices):
         m, n = U.shape[0], Vh.shape[0]
         rank = math.ceil(m * n / ((m + n) * compression_rate))
+        Vh = Vh.detach().clone()
         Vh[:S.shape[0]] *= S.view(-1, 1)
         if m < n:
             Vh = Vh[:m]
