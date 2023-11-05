@@ -95,6 +95,13 @@ def test_model(model, dataloader, device='cpu', log=True):
         print(f"Total accuracy: {100.0 * correct / total}%")
     return 100.0 * correct / total
 
+def train_classification(model, dataloader, epochs=1, device='cpu', log=True, path=None):
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, weight_decay=1e-5)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.5)
+    loss_fn = torch.nn.CrossEntropyLoss()
+    train_model(model, dataloader, loss_fn, optimizer, epochs=epochs, scheduler=scheduler, device=device, log=log, path=path)
+    
+
 class CompressedLinear(torch.nn.Module):
     """
     Линейный слой с факторизацией весов в виде W = A @ B
