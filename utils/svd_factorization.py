@@ -18,12 +18,15 @@ def get_compressed_classifier_by_rank(compressed_matrices, rank):
     classifier = torch.nn.Sequential()
     for i, (U, S, Vh, bias) in enumerate(compressed_matrices):
         m, n = U.shape[0], Vh.shape[0]
-        S_diag = torch.zeros((m, n), dtype=S.dtype)
-        S_diag[:min(m, n), :min(m, n)] = torch.diag(S)
+        Vh[:S.shape[0]] *= S.view(-1, 1)
+        if m < n:
+            Vh = Vh[:m]
+        else:
+            U = U[:, :n]
         if i == len(compressed_matrices) - 1:
-            classifier.append(CompressedLinear(U, S_diag @ Vh, bias))
+            classifier.append(CompressedLinear(U, Vh, bias))
             continue
-        classifier.append(CompressedLinear(U[:, :rank], (S_diag @ Vh)[:rank], bias))
+        classifier.append(CompressedLinear(U[:, :rank], Vh[:rank], bias))
         classifier.append(torch.nn.ReLU(inplace=True))
         classifier.append(torch.nn.Dropout())
     return classifier
@@ -33,12 +36,15 @@ def get_compressed_classifier_by_compression_rate(compressed_matrices, compressi
     for i, (U, S, Vh, bias) in enumerate(compressed_matrices):
         m, n = U.shape[0], Vh.shape[0]
         rank = math.ceil(m * n / ((m + n) * compression_rate))
-        S_diag = torch.zeros((m, n), dtype=S.dtype)
-        S_diag[:min(m, n), :min(m, n)] = torch.diag(S)
+        Vh[:S.shape[0]] *= S.view(-1, 1)
+        if m < n:
+            Vh = Vh[:m]
+        else:
+            U = U[:, :n]
         if i == len(compressed_matrices) - 1:
-            classifier.append(CompressedLinear(U, S_diag @ Vh, bias))
+            classifier.append(CompressedLinear(U, Vh, bias))
             continue
-        classifier.append(CompressedLinear(U[:, :rank], (S_diag @ Vh)[:rank], bias))
+        classifier.append(CompressedLinear(U[:, :rank], Vh[:rank], bias))
         classifier.append(torch.nn.ReLU(inplace=True))
         classifier.append(torch.nn.Dropout())
     return classifier
