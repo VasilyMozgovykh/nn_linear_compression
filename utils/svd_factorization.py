@@ -17,10 +17,13 @@ def get_linear_svd_layers(model: torch.nn.Module, device: str = "cpu"):
 def get_compressed_classifier_by_rank(compressed_matrices, rank):
     classifier = torch.nn.Sequential()
     for i, (U, S, Vh, bias) in enumerate(compressed_matrices):
+        m, n = U.shape[0], Vh.shape[0]
+        S_diag = torch.zeros((m, n), dtype=S.dtype)
+        S_diag[:min(m, n), :min(m, n)] = torch.diag(S)
         if i == len(compressed_matrices) - 1:
-            classifier.append(CompressedLinear(U, S.view(-1, 1) * Vh, bias))
+            classifier.append(CompressedLinear(U, S_diag @ Vh, bias))
             continue
-        classifier.append(CompressedLinear(U[:, :rank], S[:rank].view(-1, 1) * Vh[:rank], bias))
+        classifier.append(CompressedLinear(U[:, :rank], (S_diag @ Vh)[:rank], bias))
         classifier.append(torch.nn.ReLU(inplace=True))
         classifier.append(torch.nn.Dropout())
     return classifier
@@ -28,20 +31,22 @@ def get_compressed_classifier_by_rank(compressed_matrices, rank):
 def get_compressed_classifier_by_compression_rate(compressed_matrices, compression_rate):
     classifier = torch.nn.Sequential()
     for i, (U, S, Vh, bias) in enumerate(compressed_matrices):
-        if i == len(compressed_matrices) - 1:
-            classifier.append(CompressedLinear(U, S.view(-1, 1) * Vh, bias))
-            continue
-        m, n = U.shape[0], Vh.shape[1]
+        m, n = U.shape[0], Vh.shape[0]
         rank = math.ceil(m * n / ((m + n) * compression_rate))
-        classifier.append(CompressedLinear(U[:, :rank], S[:rank].view(-1, 1) * Vh[:rank], bias))
+        S_diag = torch.zeros((m, n), dtype=S.dtype)
+        S_diag[:min(m, n), :min(m, n)] = torch.diag(S)
+        if i == len(compressed_matrices) - 1:
+            classifier.append(CompressedLinear(U, S_diag @ Vh, bias))
+            continue
+        classifier.append(CompressedLinear(U[:, :rank], (S_diag @ Vh)[:rank], bias))
         classifier.append(torch.nn.ReLU(inplace=True))
         classifier.append(torch.nn.Dropout())
     return classifier
 
 def plot_singular_values(S):
     sv_distribution = S / S[0]
-    plt.rc("text", usetex=True)
     plt.semilogy(sv_distribution)
     plt.xlabel(r"Singular value index, $i$")
     plt.ylabel(r"$\sigma_i / \sigma_0$")
+    plt.grid(True)
     plt.show()
