@@ -29,7 +29,7 @@ Denote $S = U^T AV (S \in R^{n\times n}),\ p = min(m, n)$,  and $σ_1 ≥ σ_2 �
 $A = U SV^T$.
 
 By keeping only $k$ largest singular values , we relax $A$ by:
-$\widetilde A = \widetilde U \widetilde S \widetilde V:T$
+$\widetilde A = \widetilde U \widetilde S \widetilde V^T$
 where $\widetilde A \in R^{m \times n}$, $\widetilde U \in R^{m \times k}$, $\widetilde S \in R^{k \times k}$, and $\widetilde V \in R^{n \times k}$.
 
 
